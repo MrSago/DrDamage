@@ -277,6 +277,11 @@ function DrDamage:PlayerData()
 				calculation.eDuration = calculation.eDuration + 9
 			end
 		end
+		if self:GetSetAmount("T5 Resto") >= 2 then
+			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
+			end
+		end
 	end
 	self.Calculation["Rejuvenation"] = function( calculation, ActiveAuras, _, spell )
 		--Glyph of Rejuvenation (multiplicative - 3.3.3)
