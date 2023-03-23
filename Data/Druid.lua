@@ -206,6 +206,11 @@ function DrDamage:PlayerData()
 		if self:GetSetAmount("T9 Resto") >= 2 then
 			calculation.critPerc = calculation.critPerc + 5
 		end
+		if self:GetSetAmount("T5 Resto") >= 4 then
+			if ActiveAuras["T5x4 Blossom Period"] then
+				calculation.dmgM = calculation.dmgM * (1.0 + 0.1 * ActiveAuras["T5x4 Blossom Period"])
+			end
+		end
 	end
 	self.Calculation["Healing Touch"] = function( calculation )
 		--Glyph of Healing Touch (additive - 3.3.3)
@@ -262,7 +267,7 @@ function DrDamage:PlayerData()
 			calculation.dmgM = calculation.dmgM * 1.2
 		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
-			if ActiveAuras["T5x4R"] then
+			if ActiveAuras["T5x4 Blossom"] then
 				calculation.customHaste = true
 				calculation.eDuration = calculation.eDuration + 9
 			end
@@ -289,7 +294,7 @@ function DrDamage:PlayerData()
 			calculation.canCrit = true
 		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
-			if ActiveAuras["T5x4R"] then
+			if ActiveAuras["T5x4 Blossom"] then
 				calculation.canCrit = true
 				calculation.eDuration = calculation.eDuration + 18
 			end
@@ -553,8 +558,9 @@ function DrDamage:PlayerData()
 	--Omen of Doom (2p proc from T10 Moonkin)
 	--TODO: Additive or multiplicative?
 	self.PlayerAura[GetSpellInfo(70721)] = { School = { ["Nature"] = true, ["Arcane"] = true }, Value = 0.15, ID = 70721 }	
-	-- Tier 5 Resto
-	self.PlayerAura[GetSpellInfo(308094)] = { Spells = { 774, 16561 }, ActiveAura = "T5x4R", ID = 308094 }
+	--Tier 5x4 Resto
+	self.PlayerAura[GetSpellInfo(308093)] = { Spells = 50464, ActiveAura = "T5x4 Blossom Period", ID = 308093 }
+	self.PlayerAura[GetSpellInfo(308094)] = { Spells = { 774, 16561 }, ActiveAura = "T5x4 Blossom", ID = 308094 }
 --Target
 	--Rejuvenation
 	self.TargetAura[GetSpellInfo(774)] = { Spells = { 50464, 18562 }, ActiveAura = "Rejuvenation", Index = true, SelfCastBuff = true, ID = 774 }
