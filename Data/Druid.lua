@@ -184,7 +184,7 @@ function DrDamage:PlayerData()
 			calculation.finalMod = calculation.finalMod + calculation.RelicBonus * calculation.dmgM
 		end
 	end
-	self.Calculation["Nourish"] = function( calculation, ActiveAuras )
+	self.Calculation["Nourish"] = function( calculation, ActiveAuras, Talents, spell )
 		local hotCount = 0
 		--Nourish bonus if Rejuvenation, Regrowth, Lifebloom, or Wild Growth are active on the target
 		if ActiveAuras["Rejuvenation"] then hotCount = hotCount + 1 end
@@ -213,6 +213,14 @@ function DrDamage:PlayerData()
 		end
 		if self:GetSetAmount("T5 Resto") >= 2 then
 			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				local talentsM =
+					(1.0 + (Talents["SpellDamage"] ~= nil and
+							Talents["SpellDamage"] or 0.0)) *
+					(1.0 + (Talents["Gift of Nature"] ~= nil and
+							Talents["Gift of Nature"] or 0.0)) *
+					(1.0 + 0.2) --Empowered Rejuvenation
+				calculation.extra = calculation.dmgM * (spell[1] + calculation.spellDmgM * calculation.spellDmg) * talentsM * 0.25
+				calculation.extraName = "2T5 Ysera per target"
 				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
 			end
 		end
@@ -266,10 +274,23 @@ function DrDamage:PlayerData()
 			calculation.dmgM_Add = calculation.dmgM_Add + 0.1
 		end
 	end
-	self.Calculation["Regrowth"] = function( calculation, ActiveAuras )
+	self.Calculation["Regrowth"] = function( calculation, ActiveAuras, Talents )
 		--Glyph of Regrowth (multiplicative = 3.3.3)
 		if ActiveAuras["Regrowth"] and self:HasGlyph(54743) then
 			calculation.dmgM = calculation.dmgM * 1.2
+		end
+		if self:GetSetAmount("T5 Resto") >= 2 then
+			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				local talentsM =
+					(1.0 + (Talents["Genesis"] ~= nil and
+							Talents["Genesis"] or 0.0)) *
+					(1.0 + (Talents["Gift of Nature"] ~= nil and
+							Talents["Gift of Nature"] or 0.0)) *
+					(1.0 + 0.2) --Empowered Rejuvenation
+				calculation.extra = (335 + 0.188 * calculation.spellDmg) * talentsM * 0.25 --wowhead values
+				calculation.extraName = "2T5 Ysera per target"
+				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
+			end
 		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
 			if ActiveAuras["T5x4 Blossom"] then
@@ -277,13 +298,8 @@ function DrDamage:PlayerData()
 				calculation.eDuration = calculation.eDuration + 9
 			end
 		end
-		if self:GetSetAmount("T5 Resto") >= 2 then
-			if calculation.target and ActiveAuras["T5x2 Ysera"] then
-				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
-			end
-		end
 	end
-	self.Calculation["Rejuvenation"] = function( calculation, ActiveAuras, _, spell )
+	self.Calculation["Rejuvenation"] = function( calculation, ActiveAuras, Talents, spell )
 		--Glyph of Rejuvenation (multiplicative - 3.3.3)
 		if self:HasGlyph(54754) then
 			local target = calculation.target
@@ -303,15 +319,27 @@ function DrDamage:PlayerData()
 		if self:GetSetAmount("T9 Resto") >= 4 then
 			calculation.canCrit = true
 		end
+		if self:GetSetAmount("T5 Resto") >= 2 then
+			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				local talentsM =
+					(1.0 + (Talents["Improved Rejuvenation"] ~= nil and
+							Talents["Improved Rejuvenation"] or 0.0)) *
+					(1.0 + (Talents["Genesis"] ~= nil and
+							Talents["Genesis"] or 0.0)) *
+					(1.0 + (Talents["Gift of Nature"] ~= nil and
+							Talents["Gift of Nature"] or 0.0)) *
+					(1.0 + 0.2) -- Empowered Rejuvenation
+				calculation.extra =
+					(calculation.sTicks/calculation.eDuration) *
+					(spell[1] + calculation.spellDmgM * calculation.spellDmg) * talentsM * 0.25
+				calculation.extraName = "2T5 Ysera per target"
+				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
+			end
+		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
 			if ActiveAuras["T5x4 Blossom"] then
 				calculation.canCrit = true
 				calculation.eDuration = calculation.eDuration + 18
-			end
-		end
-		if self:GetSetAmount("T5 Resto") >= 2 then
-			if calculation.target and ActiveAuras["T5x2 Ysera"] then
-				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
 			end
 		end
 	end
@@ -592,7 +620,7 @@ function DrDamage:PlayerData()
 	--Master Shapeshifter
 	self.TargetAura[GetSpellInfo(48412)] = { Update = true }
 	--Tier 5x2 Resto Ysera
-	self.TargetAura[GetSpellInfo(308090)] = { Spells = { 774, 50464 }, ActiveAura = "T5x2 Ysera", ID = 308090 }
+	self.TargetAura[GetSpellInfo(308090)] = { Spells = { 774, 16561, 50464 }, ActiveAura = "T5x2 Ysera", ID = 308090 }
 --Bleed effects
 	--Deep Wound
 	self.TargetAura[GetSpellInfo(43104)] = 	{ ActiveAura = "Bleeding", Manual = "Bleeding", ID = 59881 }
@@ -1044,7 +1072,7 @@ function DrDamage:PlayerData()
 		--Starlight Wrath
 		[GetSpellInfo(16814)] = { 	[1] = { Effect = 1, Caster = true, Spells = { "Wrath", "Starfire" }, ModType = "Starlight Wrath" }, Manual = "Starlight Wrath" },
 		--Genesis (additive - 3.3.3)
-		[GetSpellInfo(57810)] = {	[1] = { Effect = 0.01, Caster = true, Spells = { "Rejuvenation", "Insect Swarm", "Wild Growth", "Tranquility", "Hurricane", "Swiftmend" } },
+		[GetSpellInfo(57810)] = {	[1] = { Effect = 0.01, Caster = true, Spells = { "Rejuvenation", "Regrowth", "Insect Swarm", "Wild Growth", "Tranquility", "Hurricane", "Swiftmend" }, ModType = "Genesis" },
 									[2] = { Effect = 0.01, Caster = true, Spells = { "Lifebloom", "Moonfire", "Regrowth" }, ModType = "dmgM_dot_Add" }, },
 		--Nature's Majesty
 		[GetSpellInfo(35363)] = { 	[1] = { Effect = 2, Caster = true, Spells = { "Wrath", "Starfire", "Starfall", "Nourish", "Healing Touch" }, ModType = "critPerc", }, },
@@ -1111,10 +1139,10 @@ function DrDamage:PlayerData()
 		--Master Shapeshifter
 		[GetSpellInfo(48411)] = {	[1] = { Effect = 1, Spells = "All", ModType = "Master Shapeshifter", }, Manual = "Master Shapeshifter" },
 		--Improved Rejuvenation (additive - 3.3.3)
-		[GetSpellInfo(17111)] = { 	[1] = { Effect = 0.05, Caster = true, Spells = "Rejuvenation" },
+		[GetSpellInfo(17111)] = { 	[1] = { Effect = 0.05, Caster = true, Spells = "Rejuvenation", ModType = "Improved Rejuvenation" },
 									[2] = { Effect = 0.05, Caster = true, Spells = "Swiftmend", ModType = "Improved Rejuvenation" }, },
 		--Gift of Nature (additive - 3.3.3)
-		[GetSpellInfo(17104)] = { 	[1] = { Effect = 0.02, Caster = true, Spells = "Healing" }, },
+		[GetSpellInfo(17104)] = { 	[1] = { Effect = 0.02, Caster = true, Spells = { "Healing", "Rejuvenation", "Regrowth", "Nourish" }, ModType = "Gift of Nature" }, },
 		--Improved Tranquility
 		[GetSpellInfo(17123)] = { 	[1] = { Effect = -144, Caster = true, Spells = "Tranquility", ModType = "cooldown" }, },
 		--Empowered Touch (additive - 3.3.3)
