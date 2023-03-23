@@ -211,6 +211,11 @@ function DrDamage:PlayerData()
 				calculation.dmgM = calculation.dmgM * (1.0 + 0.1 * ActiveAuras["T5x4 Blossom Period"])
 			end
 		end
+		if self:GetSetAmount("T5 Resto") >= 2 then
+			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
+			end
+		end
 	end
 	self.Calculation["Healing Touch"] = function( calculation )
 		--Glyph of Healing Touch (additive - 3.3.3)
@@ -297,6 +302,11 @@ function DrDamage:PlayerData()
 			if ActiveAuras["T5x4 Blossom"] then
 				calculation.canCrit = true
 				calculation.eDuration = calculation.eDuration + 18
+			end
+		end
+		if self:GetSetAmount("T5 Resto") >= 2 then
+			if calculation.target and ActiveAuras["T5x2 Ysera"] then
+				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
 			end
 		end
 	end
@@ -576,6 +586,8 @@ function DrDamage:PlayerData()
 	self.TargetAura[GetSpellInfo(5570)] = { Spells = { 2912, 5176 }, ActiveAura = "Insect Swarm", ID = 5570 }
 	--Master Shapeshifter
 	self.TargetAura[GetSpellInfo(48412)] = { Update = true }
+	--Tier 5x2 Resto Ysera
+	self.TargetAura[GetSpellInfo(308090)] = { Spells = { 774, 50464 }, ActiveAura = "T5x2 Ysera", ID = 308090 }
 --Bleed effects
 	--Deep Wound
 	self.TargetAura[GetSpellInfo(43104)] = 	{ ActiveAura = "Bleeding", Manual = "Bleeding", ID = 59881 }
