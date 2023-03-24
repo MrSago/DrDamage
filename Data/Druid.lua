@@ -289,7 +289,6 @@ function DrDamage:PlayerData()
 					(1.0 + 0.2) --Empowered Rejuvenation
 				calculation.extra = (335 + 0.188 * calculation.spellDmg) * talentsM * 0.25 --wowhead values
 				calculation.extraName = "2T5 Ysera per target"
-				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
 			end
 		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
@@ -333,7 +332,6 @@ function DrDamage:PlayerData()
 					(calculation.sTicks/calculation.eDuration) *
 					(spell[1] + calculation.spellDmgM * calculation.spellDmg) * talentsM * 0.25
 				calculation.extraName = "2T5 Ysera per target"
-				calculation.dmgM_Add = calculation.dmgM_Add + calculation.dmgM * 0.25 * 5
 			end
 		end
 		if self:GetSetAmount("T5 Resto") >= 4 then
