@@ -1129,7 +1129,7 @@ function DrDamage:CasterTooltip( frame, name, rank )
 	end
 
 	if settings.Extra and CalculationResults.Extra then
-		frame:AddDoubleLine((CalculationResults.ExtraName or L["Additional"]) .. ":", CalculationResults.Extra, rt, gt, bt, r, g, b)
+		frame:AddDoubleLine(L["Avg"] .. " " .. (CalculationResults.ExtraName or L["Additional"]) .. ":", CalculationResults.Extra .. " (" .. CalculationResults.ExtraMin .."-".. CalculationResults.ExtraMax .. ")", rt, gt, bt, r, g, b)
 	end
 
 	if settings.Ticks and CalculationResults.PerHit then
