@@ -206,6 +206,11 @@ function DrDamage:PlayerData()
 		if self:GetSetAmount("T9 Resto") >= 2 then
 			calculation.critPerc = calculation.critPerc + 5
 		end
+		if self:GetSetAmount("T5 Resto") >= 4 then
+			if ActiveAuras["T5x4 Blossom Period"] then
+				calculation.dmgM = calculation.dmgM * (1.0 + 0.1 * ActiveAuras["T5x4 Blossom Period"])
+			end
+		end
 	end
 	self.Calculation["Healing Touch"] = function( calculation )
 		--Glyph of Healing Touch (additive - 3.3.3)
@@ -261,6 +266,12 @@ function DrDamage:PlayerData()
 		if ActiveAuras["Regrowth"] and self:HasGlyph(54743) then
 			calculation.dmgM = calculation.dmgM * 1.2
 		end
+		if self:GetSetAmount("T5 Resto") >= 4 then
+			if ActiveAuras["T5x4 Blossom"] then
+				calculation.customHaste = true
+				calculation.eDuration = calculation.eDuration + 9
+			end
+		end
 	end
 	self.Calculation["Rejuvenation"] = function( calculation, ActiveAuras, _, spell )
 		--Glyph of Rejuvenation (multiplicative - 3.3.3)
@@ -281,6 +292,12 @@ function DrDamage:PlayerData()
 		end
 		if self:GetSetAmount("T9 Resto") >= 4 then
 			calculation.canCrit = true
+		end
+		if self:GetSetAmount("T5 Resto") >= 4 then
+			if ActiveAuras["T5x4 Blossom"] then
+				calculation.canCrit = true
+				calculation.eDuration = calculation.eDuration + 18
+			end
 		end
 	end
 	self.Calculation["Wild Growth"] = function( calculation )
@@ -488,6 +505,7 @@ function DrDamage:PlayerData()
 	self.SetBonuses["T10 Feral"] = { 50827, 50826, 50825, 50828, 50824, 51295, 51144, 51296, 51143, 51297, 51142, 51298, 51141, 51299, 51140 }
 	self.SetBonuses["T10 Moonkin"] = { 50821, 50822, 50819, 50820, 50823, 51290, 51149, 51291, 51148, 51292, 51147, 51293, 51146, 51294, 51145 }
 	self.SetBonuses["T10 Resto"] = { 50107, 50108, 50109, 50113, 50106, 51301, 51138, 51302, 51137, 51303, 51136, 51304, 51135, 51300, 51139 }
+	self.SetBonuses["T5 Resto"] = { 30219, 30221, 30216, 30217, 30220, 103478, 103480, 103476, 103477, 103479, 151672, 151674, 151670, 151671, 151673 }
 --RELICS
 --Caster
 	self.RelicSlot["Lifebloom"] = {
@@ -540,6 +558,9 @@ function DrDamage:PlayerData()
 	--Omen of Doom (2p proc from T10 Moonkin)
 	--TODO: Additive or multiplicative?
 	self.PlayerAura[GetSpellInfo(70721)] = { School = { ["Nature"] = true, ["Arcane"] = true }, Value = 0.15, ID = 70721 }	
+	--Tier 5x4 Resto
+	self.PlayerAura[GetSpellInfo(308093)] = { Spells = 50464, ActiveAura = "T5x4 Blossom Period", ID = 308093 }
+	self.PlayerAura[GetSpellInfo(308094)] = { Spells = { 774, 16561 }, ActiveAura = "T5x4 Blossom", ID = 308094 }
 --Target
 	--Rejuvenation
 	self.TargetAura[GetSpellInfo(774)] = { Spells = { 50464, 18562 }, ActiveAura = "Rejuvenation", Index = true, SelfCastBuff = true, ID = 774 }
